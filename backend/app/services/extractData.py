@@ -1,10 +1,11 @@
+import os
 from azure.ai.formrecognizer import DocumentAnalysisClient
 from azure.core.credentials import AzureKeyCredential
 from pymongo import MongoClient
 
 # Azure Document Intelligence setup
-azure_endpoint = "https://simplifile.cognitiveservices.azure.com/"  # Replace with your Azure endpoint
-azure_api_key = "4fb70f90ac3443fab9b9f7844f6a5d27"  # Replace with your Azure API key
+azure_endpoint = os.getenv('AZURE_FORM_RECOGNIZER_ENDPOINT')  # Replace with your Azure endpoint
+azure_api_key = os.getenv('AZURE_FORM_RECOGNIZER_KEY') # Replace with your Azure API key
 
 client = DocumentAnalysisClient(endpoint=azure_endpoint, credential=AzureKeyCredential(azure_api_key))
 
