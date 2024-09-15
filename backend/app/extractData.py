@@ -1,15 +1,13 @@
-import os
-from openai import OpenAI
-from dotenv import load_dotenv
 from azure.storage.blob import BlobServiceClient
 from azure.ai.formrecognizer import DocumentAnalysisClient
 from azure.core.credentials import AzureKeyCredential
+import azure.cognitiveservices.speech as speechsdk
 
 # Azure Storage Blob credentials
-connection_string = "DefaultEndpointsProtocol=https;AccountName=vtpdfstorage;AccountKey=hz7qB4MVJEao2W0NFtpI7/9Nr4FKVLuGIyuYvxYqb+dqEHDKFq8M6TkEzJyXTxHivj5p7eUt1jfY+AStXR0now==;EndpointSuffix=core.windows.net"  # Get this from Azure portal under Access keys
+connection_string = "DefaultEndpointsProtocol=https;AccountName=vtpdfstorage;AccountKey=hz7qB4MVJEao2W0NFtpI7/9Nr4FKVLuGIyuYvxYqb+dqEHDKFq8M6TkEzJyXTxHivj5p7eUt1jfY+AStXR0now==;EndpointSuffix=core.windows.net"
 container_name = "pdfcontainer"
 blob_name = "vtpdfstorage"
-download_file_path = "/Users/thiley/Documents/GitHub/Simplifile/backend/downloaded.pdf"  # Path where the PDF will be saved locally
+download_file_path = "/Users/thiley/Documents/GitHub/Simplifile/backend/downloaded.pdf"
 
 # Create a blob service client
 blob_service_client = BlobServiceClient.from_connection_string(connection_string)
@@ -24,7 +22,6 @@ with open(download_file_path, "wb") as download_file:
 
 print("Downloaded the PDF from Blob Storage.")
 
-
 # Azure Document Intelligence credentials
 endpoint = "https://simplifile.cognitiveservices.azure.com/"
 api_key = "4fb70f90ac3443fab9b9f7844f6a5d27"
@@ -37,37 +34,37 @@ with open(download_file_path, "rb") as f:
     poller = document_analysis_client.begin_analyze_document("prebuilt-document", document=f)
     result = poller.result()
 
-# Extract PDF contents into a single text variable
-pdf_text = ""
+# Extract content
+extracted_text = ""
+for page in result.pages:
+    for line in page.lines:
+        extracted_text += f"{line.content}\n"
 
-if hasattr(result, 'pages'):
-    for page in result.pages:
-        if hasattr(page, 'lines'):
-            for line in page.lines:
-                pdf_text += line.content + "\n"
-else:
-    print("No pages detected in the document.")
+# Print the extracted content
+print("Extracted text from PDF:")
+print(extracted_text)
 
-# Load environment variables from .env file
-load_dotenv()
+# Azure Text-to-Speech credentials
+subscription_key = "6a024812672640f99db4ba1f1f05c833"
+subscription_region = "eastus"
 
-# Initialize the OpenAI client
-client = OpenAI(api_key=os.environ.get("AZURE_OPENAI_KEY"))
+# Create a Speech config
+speech_config = speechsdk.SpeechConfig(subscription=subscription_key, region=subscription_region)
+speech_config.speech_synthesis_voice_name = "en-US-EmmaNeural"
 
-# Define the text to summarize
-pdf_text = ""
+# Create a Speech synthesizer
+synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config)
 
-# Create a chat completion request
-response = client.chat.completions.create(
-    messages=[
-        {"role": "user", "content": f"Summarize the following text:\n\n{pdf_text}"}
-    ],
-    model="gpt-3.5-turbo",  # Use the appropriate model
-    temperature=0.7,
-    max_tokens=500
-)
+# Synthesize the extracted text
+result = synthesizer.speak_text_async(extracted_text).get()
 
-# Extract and print the summary
-summary = response.choices[0].message['content'].strip()
-print("Summary of the PDF:")
-print(summary)
+if result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
+    print(f"Speech synthesized for text [{extracted_text[:100]}...]")  # Print first 100 chars for brevity
+elif result.reason == speechsdk.ResultReason.Canceled:
+    cancellation_details = speechsdk.SpeechSynthesisCancellationDetails.from_result(result)
+    print(f"CANCELED: Reason={cancellation_details.reason}")
+
+    if cancellation_details.reason == speechsdk.CancellationReason.Error:
+        print(f"CANCELED: ErrorCode={cancellation_details.error_code}")
+        print(f"CANCELED: ErrorDetails=[{cancellation_details.error_details}]")
+        print(f"CANCELED: Did you update the subscription info?")
