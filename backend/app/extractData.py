@@ -5,6 +5,10 @@ from azure.storage.blob import BlobServiceClient
 from azure.ai.formrecognizer import DocumentAnalysisClient
 from azure.core.credentials import AzureKeyCredential
 
+#Getter for other files
+def getExtracted_Text():
+    return extracted_text
+
 # Azure Storage Blob credentials
 connection_string = "DefaultEndpointsProtocol=https;AccountName=vtpdfstorage;AccountKey=hz7qB4MVJEao2W0NFtpI7/9Nr4FKVLuGIyuYvxYqb+dqEHDKFq8M6TkEzJyXTxHivj5p7eUt1jfY+AStXR0now==;EndpointSuffix=core.windows.net"
 container_name = "pdfcontainer"
@@ -48,9 +52,6 @@ for page in result.pages:
         extracted_text += f"{line.content}\n"
 
 # Print the extracted content
-print("Extracted text from PDF:")
+print("Extracted text from PDF:\n")
 print(extracted_text)
 
-#Getter for other files
-def getExtracted_Text():
-    return extracted_text
