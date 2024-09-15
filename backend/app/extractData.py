@@ -9,7 +9,8 @@ import azure.cognitiveservices.speech as speechsdk
 # Azure Storage Blob credentials
 connection_string = "DefaultEndpointsProtocol=https;AccountName=vtpdfstorage;AccountKey=hz7qB4MVJEao2W0NFtpI7/9Nr4FKVLuGIyuYvxYqb+dqEHDKFq8M6TkEzJyXTxHivj5p7eUt1jfY+AStXR0now==;EndpointSuffix=core.windows.net"
 container_name = "pdfcontainer"
-download_file_path = "/Users/thiley/Documents/GitHub/Simplifile/backend/downloaded.pdf"
+home_directory = os.path.expanduser("~")
+download_file_path = os.path.join(home_directory, "Downloads", "downloaded.pdf")
 
 # Create a blob service client
 blob_service_client = BlobServiceClient.from_connection_string(connection_string)
