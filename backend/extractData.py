@@ -1,58 +1,73 @@
+import os
+from openai import OpenAI
+from dotenv import load_dotenv
+from azure.storage.blob import BlobServiceClient
 from azure.ai.formrecognizer import DocumentAnalysisClient
 from azure.core.credentials import AzureKeyCredential
-from pymongo import MongoClient
 
-# Azure Document Intelligence setup
-azure_endpoint = "https://simplifile.cognitiveservices.azure.com/"  # Replace with your Azure endpoint
-azure_api_key = "4fb70f90ac3443fab9b9f7844f6a5d27"  # Replace with your Azure API key
+# Azure Storage Blob credentials
+connection_string = "DefaultEndpointsProtocol=https;AccountName=vtpdfstorage;AccountKey=hz7qB4MVJEao2W0NFtpI7/9Nr4FKVLuGIyuYvxYqb+dqEHDKFq8M6TkEzJyXTxHivj5p7eUt1jfY+AStXR0now==;EndpointSuffix=core.windows.net"  # Get this from Azure portal under Access keys
+container_name = "pdfcontainer"
+blob_name = "vtpdfstorage"
+download_file_path = "/Users/thiley/Documents/GitHub/Simplifile/backend/downloaded.pdf"  # Path where the PDF will be saved locally
 
-client = DocumentAnalysisClient(endpoint=azure_endpoint, credential=AzureKeyCredential(azure_api_key))
+# Create a blob service client
+blob_service_client = BlobServiceClient.from_connection_string(connection_string)
 
-# MongoDB setup
-mongo_client = MongoClient("mongodb+srv://thiley:thileyPassword@cluster0.x3zrc.mongodb.net/")  # Replace with your MongoDB URI if remote
-db = mongo_client["documentDatabase"]
-collection = db["documentData"]
+# Get the container client
+container_client = blob_service_client.get_container_client(container_name)
 
-# Analyze document
-document_path = "/Users/thiley/Desktop/Hackathon/index.pdf"  # Replace with your document's path
+# Download the blob
+with open(download_file_path, "wb") as download_file:
+    blob_data = container_client.download_blob(blob_name)
+    download_file.write(blob_data.readall())
 
-with open(document_path, "rb") as f:
-    poller = client.begin_analyze_document("prebuilt-document", document=f.read())
+print("Downloaded the PDF from Blob Storage.")
+
+
+# Azure Document Intelligence credentials
+endpoint = "https://simplifile.cognitiveservices.azure.com/"
+api_key = "4fb70f90ac3443fab9b9f7844f6a5d27"
+
+# Create a Document Analysis client
+document_analysis_client = DocumentAnalysisClient(endpoint=endpoint, credential=AzureKeyCredential(api_key))
+
+# Open the downloaded PDF file
+with open(download_file_path, "rb") as f:
+    poller = document_analysis_client.begin_analyze_document("prebuilt-document", document=f)
     result = poller.result()
 
-# Prepare extracted data
-extracted_data = {
-    "document_id": "12345",  # You can generate a unique ID for each document
-    "pages": []
-}
+# Extract PDF contents into a single text variable
+pdf_text = ""
 
-# Iterate through each page in the result
-for idx, page in enumerate(result.pages):
-    page_data = {
-        "page_number": idx + 1,
-        "lines": [],
-        "tables": []
-    }
+if hasattr(result, 'pages'):
+    for page in result.pages:
+        if hasattr(page, 'lines'):
+            for line in page.lines:
+                pdf_text += line.content + "\n"
+else:
+    print("No pages detected in the document.")
 
-    # Extract lines of text
-    for line in page.lines:
-        page_data["lines"].append({"text": line.content})
+# Load environment variables from .env file
+load_dotenv()
 
-    # Extract table data
-    for table in result.tables:
-        table_data = {"rows": []}
-        for cell in table.cells:
-            table_data["rows"].append({
-                "row": cell.row_index,
-                "column": cell.column_index,
-                "content": cell.content
-            })
-        page_data["tables"].append(table_data)
+# Initialize the OpenAI client
+client = OpenAI(api_key=os.environ.get("AZURE_OPENAI_KEY"))
 
-    extracted_data["pages"].append(page_data)
+# Define the text to summarize
+pdf_text = ""
 
-# Insert the extracted data into MongoDB
-collection.insert_one(extracted_data)
+# Create a chat completion request
+response = client.chat.completions.create(
+    messages=[
+        {"role": "user", "content": f"Summarize the following text:\n\n{pdf_text}"}
+    ],
+    model="gpt-3.5-turbo",  # Use the appropriate model
+    temperature=0.7,
+    max_tokens=500
+)
 
-# Optional: Print a success message
-print("Document data has been successfully inserted into MongoDB.")
+# Extract and print the summary
+summary = response.choices[0].message['content'].strip()
+print("Summary of the PDF:")
+print(summary)
