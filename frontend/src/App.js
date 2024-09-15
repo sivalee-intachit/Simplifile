@@ -45,11 +45,14 @@ const UploadPDFToBlob = () => {
   return (
     <div className = "App">
       <header className = "App-header">
-        <h1>Simplifile</h1>
-        <div className="Content"> </div>
+        <h1 className="Title">Simplifile</h1>
+        <p className="Description">Simplifile simplifies the process of reading your files by reducing the content and reading it aloud for your users.</p>
+        <br></br>
+        <div className="Content">
           <h3>File Upload</h3>
           <input type="file" accept="application/pdf" onChange={handleFileChange} />
-          <button onClick={uploadFile}>Upload PDF</button>          
+          <button onClick={uploadFile}>Upload PDF</button>   
+        </div>       
       </header>
       <p>{uploadStatus}</p>
     </div>

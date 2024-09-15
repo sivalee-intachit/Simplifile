@@ -24,15 +24,32 @@
   color: white;
 }
 
+.Title {
+  font-family: "Poppins", sans-serif;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+.Description {
+  
+  margin-top: 5;
+  color: rgb(184, 184, 184);
+}
+
+.Content {
+  padding-top: 30;
+  background-color: #3e434f;
+  width: 800px;
+  height: 400px;
+  border-radius: 25px;
+  vertical-align: middle;
+}
+
+.h3 {
+  color:#3f4653;
+  font-family: "Poppins", sans-serif;
+}
+
 .App-link {
   color: #61dafb;
 }
-
-/* @keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-} */
