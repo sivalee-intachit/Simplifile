@@ -7,6 +7,7 @@ const UploadPDFToBlob = () => {
   const [file, setFile] = useState(null);
   const [uploadStatus, setUploadStatus] = useState('');
 
+
   const sasToken = 'sp=raw&st=2024-09-15T03:32:10Z&se=2024-09-15T11:32:10Z&spr=https&sv=2022-11-02&sr=c&sig=oOAQsLb4C4N%2FhQrc5zc7ftPTtXL8xFlx8ShWoUprrVA%3D'; // Replace with your Azure SAS Token
   const containerName = 'pdfcontainer'; // Replace with your Blob Storage container name
   const storageAccountName = 'vtpdfstorage'; // Replace with your storage account name
