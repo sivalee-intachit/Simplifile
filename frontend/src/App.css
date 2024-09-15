@@ -1,6 +1,9 @@
 .App {
+  position: relative;
   text-align: center;
-}
+  width: 100%;
+  height: 100vh; /* Ensure the App fills the entire viewport */
+  overflow: hidden; /* Prevent scrollbars from showing up */}
 
 .App-logo {
   height: 40vmin;
@@ -14,14 +17,16 @@
 }
 
 .App-header {
-  background-color: #282c34;
+  background: none;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
+  color: none;
+  position: relative;
+  z-index: 1; /* Make sure the header stays above the particles */
 }
 
 .Title {

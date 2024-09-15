@@ -1,7 +1,11 @@
 import './App.css';
 import React, {useState} from "react";
-//import axios from "axios"
+import Particles from "react-tsparticles";
+import { loadFull } from "tsparticles";
+import { useCallback } from "react";
 import { BlobServiceClient } from "@azure/storage-blob";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFile } from "@fortawesome/free-solid-svg-icons";
 
 const UploadPDFToBlob = () => {
   const [file, setFile] = useState(null);
@@ -38,8 +42,52 @@ const UploadPDFToBlob = () => {
     }
   };
 
+  /* Particle configuration for icon */
+  const particlesInit = useCallback(async (engine) => {
+    await loadFull(engine);
+  }, []);
+
+  const particlesOptions = {
+    particles: {
+      number: { value: 30 },
+      shape: {
+        type: "char",
+        character: {
+          value: ['\uf15b'], // FontAwesome Unicode for "file" icon
+          font: "FontAwesome", // FontAwesome is recognized by tsparticles
+          style: "",
+          weight: "400",
+        },
+      },
+      size: { value: 20 },
+      move: {
+        enable: true,
+        speed: 3,
+        direction: "none",
+        random: true,
+        straight: false,
+        out_mode: "out",
+      },
+      opacity: { value: 0.8 },
+    },
+    interactivity: {
+      events: {
+        onhover: { enable: true, mode: "repulse" },
+      },
+      modes: {
+        repulse: { distance: 100 },
+      },
+    },
+    retina_detect: true,
+  };
+
   return (
     <div className = "App">
+
+      <Particles id="tsparticles" init={particlesInit} options={particlesOptions}> 
+      style={{position: "absolute", top: 0, left: 0, width: "100%",height: "100%", zIndex: 0}}
+      </Particles>
+
       <header className = "App-header">
         <h1 className="Title">Simplifile</h1>
         <p className="Description">Simplifile simplifies the process of reading your files by reducing the content and reading it aloud for your users.</p>
