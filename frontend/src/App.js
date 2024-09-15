@@ -19,10 +19,6 @@ const UploadPDFToBlob = () => {
   };
 
   const uploadFile = async () => {
-    if (!file) {
-      alert('Please select a file first!');
-      return;
-    }
 
     try {
       setUploadStatus('Uploading...');
