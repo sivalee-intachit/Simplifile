@@ -41,6 +41,28 @@ const UploadPDFToBlob = () => {
 
   return (
     <div className = "App">
+      <ul class="background">
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+      </ul>
       <header className = "App-header">
         <h1 className="Title">Simplifile</h1>
         <p className="Description">Simplifile simplifies the process of reading your files by reducing the content and reading it aloud for your users.</p>
